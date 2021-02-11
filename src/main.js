@@ -2,23 +2,23 @@ import $ from 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/styles.css';
-import MarsWeather from './js/mars_service.js';
-import RoverPhoto from './js/rover_photo_service.js';
+import MarsWeather from './services/mars_service.js';
+import RoverPhoto from './services/rover_photo_service.js';
 
 const displayPressure = (weatherResponse) => {
   for (let i=0; i<=2; i++) {
     if( 'PRE' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].PRE.valid === true){    
-      $('.showWeatherPressure').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${response[weatherResponse.sol_keys[i]].PRE.av} Pa. </li>`)
+      $('.showWeatherPressure').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${weatherResponse[weatherResponse.sol_keys[i]].PRE.av} Pa. </li>`)
     } else {
       $('.showWeatherPressure').append(`Sorry, this data is not currently available`)
       }
     }
   }
 
-const displayTemperature = (response) => {
+const displayTemperature = (weatherResponse) => {
   for (let i=0; i<=2; i++) {
     if( 'AT' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].AT.valid === true) {
-        $('.showWeatherTemperature').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${response[weatherResponse.sol_keys[i]].AT.av} degrees Fahrenheit. </li>`)
+        $('.showWeatherTemperature').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${weatherResponse[weatherResponse.sol_keys[i]].AT.av} degrees Fahrenheit. </li>`)
       } else {
         $('.showWeatherTemperature').append(`<li> Sorry, the data for Sol ${weatherResponse.sol_keys[i]} is not currently available </li>`)
       }
@@ -29,6 +29,9 @@ const displayPhoto = (response) => {
   $('.rover-photo').append(`<img src=${response.photos[1].img_src}></img>`);
 }
 
+const displayErrors = (error) => {
+  $('.show-errors').text(`${error}`)
+}
 // async function makeApiCall() {
 //   const response = await MarsWeather.getWeather();
 //   console.log(response);
@@ -40,7 +43,7 @@ $(document).ready(async function() {
   MarsWeather.getWeather()
   .then(function(weatherResponse){
     if(weatherResponse instanceof Error) {
-      throw Error(`NASA Weather API error: ${weatherResponse.message}`);
+      throw Error(`NASA Weather API ${weatherResponse.message}`);
     }
     displayPressure(weatherResponse);
     displayTemperature(weatherResponse);
@@ -48,24 +51,20 @@ $(document).ready(async function() {
   })
   .then(function(imageResponse) {
     if (imageResponse instanceof Error) {
-      throw Error(`NASA Image API error: ${imageResponse.message}`);
+      throw Error(`NASA Image API ${imageResponse.message}`);
     }
     displayPhoto(imageResponse);
   })
   .catch(function(error) {
     displayErrors(error.message)
   })
+  $('#pressure').on('click', function() {
+    $('#pressure-readings').toggle();
+  });
+  $('#temperature').on('click', function() {
+    $('#temperature-readings').toggle();
+  });
+  $('#photo').on('click', function () {
+    $('.rover-photo').toggle();
+  });
 });
-
-
-
-
-
-  // $('#pressure').on('click', function() {
-  //   $('#pressure-readings').toggle();
-  // });
-  // $('#temperature').on('click', function() {
-  //   $('#temperature-readings').toggle();
-  // });
-  // $('#photo').on('click', async function () {
-
