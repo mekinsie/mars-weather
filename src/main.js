@@ -2,46 +2,70 @@ import $ from 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/styles.css';
-import MarsWeather from './js/mars.js';
-import RoverPhoto from './js/rover_photos.js';
+import MarsWeather from './js/mars_service.js';
+import RoverPhoto from './js/rover_photo_service.js';
 
-const checkPreValidity = (response) => {
+const displayPressure = (weatherResponse) => {
   for (let i=0; i<=2; i++) {
-    if( 'PRE' in response.validity_checks[response.sol_keys[i]] && response.validity_checks[response.sol_keys[i]].PRE.valid === true){    
-      $('.showWeatherPressure').append(`<li> Sol ${response.sol_keys[i]}: ${response[response.sol_keys[i]].PRE.av} Pa. </li>`)
+    if( 'PRE' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].PRE.valid === true){    
+      $('.showWeatherPressure').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${response[weatherResponse.sol_keys[i]].PRE.av} Pa. </li>`)
     } else {
       $('.showWeatherPressure').append(`Sorry, this data is not currently available`)
       }
     }
   }
 
-const checkAtValidity = (response) => {
+const displayTemperature = (response) => {
   for (let i=0; i<=2; i++) {
-    if( 'AT' in response.validity_checks[response.sol_keys[i]] && response.validity_checks[response.sol_keys[i]].AT.valid === true) {
-        $('.showWeatherTemperature').append(`<li> Sol ${response.sol_keys[i]}: ${response[response.sol_keys[i]].AT.av} degrees Fahrenheit. </li>`)
+    if( 'AT' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].AT.valid === true) {
+        $('.showWeatherTemperature').append(`<li> Sol ${weatherResponse.sol_keys[i]}: ${response[weatherResponse.sol_keys[i]].AT.av} degrees Fahrenheit. </li>`)
       } else {
-        $('.showWeatherTemperature').append(`<li> Sorry, the data for Sol ${response.sol_keys[i]} is not currently available </li>`)
+        $('.showWeatherTemperature').append(`<li> Sorry, the data for Sol ${weatherResponse.sol_keys[i]} is not currently available </li>`)
       }
     }
   }
 
-async function makeApiCall() {
-  const response = await MarsWeather.getWeather();
-  console.log(response);
-  checkPreValidity(response);
-  checkAtValidity(response);
+const displayPhoto = (response) => {
+  $('.rover-photo').append(`<img src=${response.photos[1].img_src}></img>`);
 }
 
-$(document).ready(function() {
-  makeApiCall();
-  $('#pressure').on('click', function() {
-    $('#pressure-readings').toggle();
-  });
-  $('#temperature').on('click', function() {
-    $('#temperature-readings').toggle();
-  });
-  $('#photo').on('click', async function () {
-    const roverResponse = await RoverPhoto.getPhoto();
-    $('.rover-photo').append(`<img src=${roverResponse.photos[1].img_src}></img>`);
+// async function makeApiCall() {
+//   const response = await MarsWeather.getWeather();
+//   console.log(response);
+// }
+
+$(document).ready(async function() {
+  // makeApiCall();
+  
+  MarsWeather.getWeather()
+  .then(function(weatherResponse){
+    if(weatherResponse instanceof Error) {
+      throw Error(`NASA Weather API error: ${weatherResponse.message}`);
+    }
+    displayPressure(weatherResponse);
+    displayTemperature(weatherResponse);
+    return RoverPhoto.getPhoto();
+  })
+  .then(function(imageResponse) {
+    if (imageResponse instanceof Error) {
+      throw Error(`NASA Image API error: ${imageResponse.message}`);
+    }
+    displayPhoto(imageResponse);
+  })
+  .catch(function(error) {
+    displayErrors(error.message)
   })
 });
+
+
+
+
+
+  // $('#pressure').on('click', function() {
+  //   $('#pressure-readings').toggle();
+  // });
+  // $('#temperature').on('click', function() {
+  //   $('#temperature-readings').toggle();
+  // });
+  // $('#photo').on('click', async function () {
+
