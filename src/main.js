@@ -6,29 +6,26 @@ import MarsWeather from './services/mars_service.js';
 import RoverPhoto from './services/rover_photo_service.js';
 
 const displayPressure = (weatherResponse) => {
-  for (let i=0; i<=2; i++) {
-    if( 'PRE' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].PRE.valid === true){    
-      $('.showWeatherPressure').append(`<li> Insight Sol ${weatherResponse.sol_keys[i]}: ${weatherResponse[weatherResponse.sol_keys[i]].PRE.av} Pa. </li>`)
+    if( 'PRE' in weatherResponse.validity_checks[weatherResponse.sol_keys[6]] && weatherResponse.validity_checks[weatherResponse.sol_keys[6]].PRE.valid === true){    
+      $('.showWeatherPressure').append(`<li> Insight Sol ${weatherResponse.sol_keys[6]}: ${weatherResponse[weatherResponse.sol_keys[6]].PRE.av} Pa. </li>`)
+      $('.showWeatherPressure').append(`<li> This sol corresponds to earth date: ${weatherResponse[weatherResponse.sol_keys[6]].First_UTC.slice(0, 10)} </li>`)
     } else {
       $('.showWeatherPressure').append(`Sorry, this data is not currently available`)
       }
     }
-  }
 
 const displayTemperature = (weatherResponse) => {
-  for (let i=0; i<=2; i++) {
-    if( 'AT' in weatherResponse.validity_checks[weatherResponse.sol_keys[i]] && weatherResponse.validity_checks[weatherResponse.sol_keys[i]].AT.valid === true) {
-        $('.showWeatherTemperature').append(`<li> Insight Sol ${weatherResponse.sol_keys[i]}: ${weatherResponse[weatherResponse.sol_keys[i]].AT.av} degrees Fahrenheit. </li>`)
+    if( 'AT' in weatherResponse.validity_checks[weatherResponse.sol_keys[6]] && weatherResponse.validity_checks[weatherResponse.sol_keys[6]].AT.valid === true) {
+        $('.showWeatherTemperature').append(`<li> Insight Sol ${weatherResponse.sol_keys[6]}: ${weatherResponse[weatherResponse.sol_keys[6]].AT.av} degrees Fahrenheit. </li>`)
       } else {
-        $('.showWeatherTemperature').append(`<li> Sorry, the data for Sol ${weatherResponse.sol_keys[i]} is not currently available </li>`)
+        $('.showWeatherTemperature').append(`<li> Sorry, the data for Sol ${weatherResponse.sol_keys[6]} is not currently available </li>`)
       }
     }
-  }
 
   const displayPhoto = (response) => {
   for (let i=0; i<=2; i++) {
   $('.rover-photo').append(`<img src=${response.photos[1].img_src}></img>`);
-  $('.rover-photo').append(`<p> Curiosity Sol Day since landing: ${response.photos[0].sol} </p>`)
+  $('.rover-photo').append(`<p> Curiosity Sol Day since landing: ${response.photos[0].sol}, equivalent to day ${parseInt(response.photos[0].sol) - 2241} on Insight rover.</p>`)
   }
 }
 
@@ -48,7 +45,7 @@ $(document).ready(async function() {
     }
     displayPressure(weatherResponse);
     displayTemperature(weatherResponse);
-    return RoverPhoto.getPhoto(parseInt(weatherResponse.sol_keys[0]) + 2241);
+    return RoverPhoto.getPhoto(parseInt(weatherResponse.sol_keys[6]) + 2241);
     // console.log(parseInt(weatherResponse.sol_keys[0]) + 2241)
   })
   .then(function(imageResponse) {
