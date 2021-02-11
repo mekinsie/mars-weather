@@ -1,7 +1,9 @@
-#pressure-readings {
+#pressure-readings,
+#temperature-readings,
+.rover-photo {
   display:none;
 }
 
-#temperature-readings {
-  display:none;
+img {
+  height:500px;
 }
