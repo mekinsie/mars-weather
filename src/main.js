@@ -8,7 +8,7 @@ import RoverPhoto from './services/rover_photo_service.js';
 const displayPressure = (weatherResponse) => {
     if( 'PRE' in weatherResponse.validity_checks[weatherResponse.sol_keys[6]] && weatherResponse.validity_checks[weatherResponse.sol_keys[6]].PRE.valid === true){    
       $('.showWeatherPressure').append(`<li> Insight Sol ${weatherResponse.sol_keys[6]}: ${weatherResponse[weatherResponse.sol_keys[6]].PRE.av} Pa. </li>`)
-      $('.showWeatherPressure').append(`<li> This sol corresponds to earth date: ${weatherResponse[weatherResponse.sol_keys[6]].First_UTC.slice(0, 10)} </li>`)
+      $('.showWeatherPressure').append(`<li> This Sol corresponds to earth date: ${weatherResponse[weatherResponse.sol_keys[6]].First_UTC.slice(0, 10)} </li>`)
     } else {
       $('.showWeatherPressure').append(`Sorry, this data is not currently available`)
       }
@@ -23,21 +23,17 @@ const displayTemperature = (weatherResponse) => {
     }
 
   const displayPhoto = (response) => {
-  for (let i=0; i<=2; i++) {
   $('.rover-photo').append(`<img src=${response.photos[1].img_src}></img>`);
-  $('.rover-photo').append(`<p> Curiosity Sol Day since landing: ${response.photos[0].sol}, equivalent to day ${parseInt(response.photos[0].sol) - 2241} on Insight rover.</p>`)
+  $('.rover-photo').append(`<img src=${response.photos[14].img_src}></img>`);
+  $('.rover-photo').append(`<img src=${response.photos[18].img_src}></img>`);
+  $('.rover-photo').append(`<p> Photos from Curiosity rover. Sol: ${response.photos[0].sol} (days since Curiosity landing), equivalent to sol ${parseInt(response.photos[0].sol) - 2241} on Insight rover.</p>`)
   }
-}
 
 const displayErrors = (error) => {
   $('.show-errors').text(`${error}`)
 }
-// async function makeApiCall() {
-//   const response = await MarsWeather.getWeather();
-//   console.log(response);
-// }
 
-$(document).ready(async function() {  
+$(document).ready(function() {  
   MarsWeather.getWeather()
   .then(function(weatherResponse){
     if(weatherResponse instanceof Error) {
@@ -46,7 +42,6 @@ $(document).ready(async function() {
     displayPressure(weatherResponse);
     displayTemperature(weatherResponse);
     return RoverPhoto.getPhoto(parseInt(weatherResponse.sol_keys[6]) + 2241);
-    // console.log(parseInt(weatherResponse.sol_keys[0]) + 2241)
   })
   .then(function(imageResponse) {
     if (imageResponse instanceof Error) {
